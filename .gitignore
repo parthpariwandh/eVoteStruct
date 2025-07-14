@@ -1,41 +1,88 @@
-# Prerequisites
-*.d
+#include <iostream>
+#include <string>
+#include <vector>
+#include <map>
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+using namespace std;
 
-# Precompiled Headers
-*.gch
-*.pch
+struct Student {
+    string name;
+    string enrollmentID;
+    bool google2FA;
+    bool otpVerified;
+    string opinion;
+};
 
-# Linker files
-*.ilk
+struct Node {
+    string position;
+    vector<Student> students;
+    Node* left;
+    Node* right;
+    
+    Node(string pos) {
+        position = pos;
+        left = nullptr;
+        right = nullptr;
+    }
+};
 
-# Debugger Files
-*.pdb
+class DigitalBallotSystem {
+    Node* root;
+    map<string, Student> registeredStudents;
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+public:
+    DigitalBallotSystem() {
+        root = new Node("Voting Authority");
+    }
 
-# Fortran module files
-*.mod
-*.smod
+    void addDepartment(string departmentName, vector<Student> deptStudents) {
+        Node* departmentNode = new Node(departmentName);
+        departmentNode->students = deptStudents;
+        if (!root->left) {
+            root->left = departmentNode;
+        } else if (!root->right) {
+            root->right = departmentNode;
+        }
+    }
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+    void registerStudent(Student s) {
+        if (s.google2FA && s.otpVerified) {
+            registeredStudents[s.enrollmentID] = s;
+        }
+    }
 
-# Executables
-*.exe
-*.out
-*.app
+    void submitForm(string enrollmentID, string opinion) {
+        if (registeredStudents.find(enrollmentID) != registeredStudents.end()) {
+            registeredStudents[enrollmentID].opinion = opinion;
+        }
+    }
 
-# debug information files
-*.dwo
+    void displayResults() {
+        for (auto& entry : registeredStudents) {
+            cout << "Student ID: " << entry.first << " | Opinion: " << entry.second.opinion << endl;
+        }
+    }
+};
+
+int main() {
+    DigitalBallotSystem dbs;
+
+    Student s1 = {"Parth Pariwandh", "JU2023ME001", true, true, ""};
+    Student s2 = {"Kamara Harshvardhan", "UOH2023DS002", true, true, ""};
+
+    vector<Student> mechJU = {s1};
+    vector<Student> dataUOH = {s2};
+
+    dbs.addDepartment("Mechanical Engineering - Jadavpur University", mechJU);
+    dbs.addDepartment("Data Science - University of Hyderabad", dataUOH);
+
+    dbs.registerStudent(s1);
+    dbs.registerStudent(s2);
+
+    dbs.submitForm("JU2023ME001", "Strongly Support Institutional Digital Elections");
+    dbs.submitForm("UOH2023DS002", "Recommend Biometric Integration for Verification");
+
+    dbs.displayResults();
+
+    return 0;
+}
